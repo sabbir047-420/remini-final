@@ -1,7 +1,6 @@
-const Replicate = require("replicate");
+const fetch = require("node-fetch");
 
 exports.handler = async function (event, context) {
-  // শুধু POST মেথড এলাউ করা হবে
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
@@ -9,25 +8,38 @@ exports.handler = async function (event, context) {
   try {
     const { image } = JSON.parse(event.body);
 
-    const replicate = new Replicate({
-      auth: process.env.REPLICATE_API_TOKEN,
-    });
+    // ১. বেস৬৪ ইমেজ থেকে আসল ইমেজ ডেটা বের করা
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
 
-    // GFPGAN মডেল রান করা (Remini-র বিকল্প)
-    const output = await replicate.run(
-      "tencentarc/gfpgan:9283608cc6b7be6b65a8e44983db012355fde4132009bf99d976b2f0896856a3",
+    // ২. Hugging Face API কল করা (বিনামূল্যে)
+    // আমরা এখানে 'bgs/ESRGAN' মডেল ব্যবহার করছি যা ছবি ক্লিয়ার করে
+    const response = await fetch(
+      "https://api-inference.huggingface.co/models/bgs/ESRGAN",
       {
-        input: {
-          img: image,
-          version: "v1.4",
-          scale: 2
-        }
+        headers: {
+          Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: buffer,
       }
     );
 
+    // ৩. যদি সার্ভার বিজি থাকে
+    if (!response.ok) {
+        const err = await response.text();
+        return { statusCode: 500, body: JSON.stringify({ error: "Free server is busy. Try again in 1 min." }) };
+    }
+
+    // ৪. রেজাল্ট প্রসেস করা
+    const arrayBuffer = await response.arrayBuffer();
+    const resultBuffer = Buffer.from(arrayBuffer);
+    const outputBase64 = `data:image/jpeg;base64,${resultBuffer.toString("base64")}`;
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ output: output }),
+      body: JSON.stringify({ output: outputBase64 }),
     };
 
   } catch (error) {
