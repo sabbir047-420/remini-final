@@ -4,54 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI Photo Enhancer</title>
-    
-    <!-- App Config -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#FF4D5A">
 
-    <!-- Styles -->
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
         body { font-family: 'Poppins', sans-serif; background: #F6F7FB; text-align: center; margin: 0; padding: 20px; color: #333; }
         
-        /* Navbar */
-        nav { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        nav { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo { font-weight: 700; font-size: 18px; }
         .logo span { color: #FF4D5A; }
-        
-        /* Upload Area */
-        .upload-box { background: white; padding: 40px; border-radius: 20px; border: 2px dashed #ccc; cursor: pointer; margin-bottom: 20px; }
-        .upload-icon { font-size: 40px; color: #FF4D5A; margin-bottom: 10px; }
-        
-        /* Main Button */
-        .btn { background: #FF4D5A; color: white; border: none; padding: 15px 30px; font-size: 16px; border-radius: 50px; font-weight: 600; width: 100%; max-width: 300px; cursor: pointer; box-shadow: 0 4px 15px rgba(255, 77, 90, 0.4); }
-        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .dev-badge { background: #fff0f1; color: #FF4D5A; padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
 
-        /* Loader */
-        .loader { display: none; margin: 15px auto; border: 4px solid #f3f3f3; border-top: 4px solid #FF4D5A; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
+        h1 { font-size: 26px; line-height: 1.3; margin-bottom: 10px; }
+        
+        .upload-box { background: white; padding: 40px; border-radius: 20px; border: 2px dashed #FF4D5A; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .upload-box:active { transform: scale(0.98); background: #fff5f6; }
+        .icon-large { font-size: 50px; color: #FF4D5A; margin-bottom: 10px; }
+        
+        .btn { background: #FF4D5A; color: white; border: none; padding: 16px 30px; font-size: 18px; border-radius: 50px; font-weight: 600; width: 100%; max-width: 350px; cursor: pointer; box-shadow: 0 8px 20px rgba(255, 77, 90, 0.3); transition: 0.3s; }
+        .btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+        
+        .loader { display: none; margin: 20px auto; border: 4px solid #f3f3f3; border-top: 4px solid #FF4D5A; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Result Area */
-        #result-area { display: none; margin-top: 20px; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        #result-area { display: none; margin-top: 30px; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         
-        /* Before/After Slider */
-        .ba-slider { position: relative; width: 100%; overflow: hidden; border-radius: 10px; border: 2px solid #eee; touch-action: none; }
+        .ba-slider { position: relative; width: 100%; overflow: hidden; border-radius: 15px; touch-action: none; border: 2px solid #eee; }
         .ba-slider img { width: 100%; display: block; }
         .img-after { position: absolute; top: 0; left: 0; height: 100%; width: 50%; border-right: 3px solid white; background-size: cover; overflow: hidden; }
-        .handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FF4D5A; box-shadow: 0 2px 5px rgba(0,0,0,0.3); pointer-events: none; }
+        .handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FF4D5A; box-shadow: 0 4px 10px rgba(0,0,0,0.3); pointer-events: none; }
         
-        /* DOWNLOAD BUTTON STYLE */
-        .download-btn {
-            background: #27ae60; 
-            margin-top: 20px; 
-            display: inline-block;
-            text-decoration: none;
-        }
-        .download-btn:hover { background: #219150; }
+        .download-btn { background: #2ecc71; margin-top: 20px; display: inline-block; box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3); }
 
-        .dev-badge { font-size: 12px; background: #ffeaa7; padding: 3px 8px; border-radius: 5px; color: #d35400; font-weight: bold; }
+        .footer { margin-top: 50px; color: #888; font-size: 13px; }
     </style>
 </head>
 <body>
@@ -62,45 +51,53 @@
     </nav>
 
     <h1>Make Photos <br> <span style="color:#FF4D5A">Crystal Clear</span></h1>
+    <p style="color:#666; font-size:14px; margin-bottom:30px;">Fix blurry photos instantly using AI</p>
 
     <!-- Upload Section -->
     <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-        <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-        <h3>Upload Blurry Photo</h3>
-        <p style="color:#888; font-size:12px;">Max size: 4MB</p>
+        <i class="fas fa-cloud-upload-alt icon-large"></i>
+        <h3>Upload Photo</h3>
+        <p style="color:#888; font-size:12px;">Supported: JPG, PNG (Max 5MB)</p>
         <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewPhoto()">
     </div>
 
-    <img id="preview-image" src="" style="width:100%; border-radius:10px; display:none; margin-bottom:20px;">
+    <img id="preview-image" src="" style="width:100%; border-radius:15px; display:none; margin-bottom:20px; border:2px solid #eee;">
 
-    <button id="enhanceBtn" class="btn" onclick="enhancePhoto()">✨ Enhance Now</button>
+    <button id="enhanceBtn" class="btn" onclick="enhancePhoto()">✨ Enhance Photo</button>
     
     <div class="loader" id="loader"></div>
-    <p id="loadingText" style="display:none; color:#666;">Enhancing... Please wait...</p>
+    <p id="loadingText" style="display:none; color:#666; margin-top:10px;">Enhancing... This may take 30-60s...</p>
 
-    <!-- Result & Download Section -->
+    <!-- Result Section -->
     <div id="result-area">
-        <h3 style="color:#333; margin-bottom:15px;">Before / After</h3>
+        <h3 style="margin-bottom:15px; color:#333;">Before / After</h3>
         
         <div class="ba-slider" id="comparisonSlider">
-            <img id="imgOriginal" src=""> <!-- Before -->
+            <img id="imgOriginal" src="">
             <div class="img-after" id="imgClipped">
-                <img id="imgEnhanced" src=""> <!-- After -->
+                <img id="imgEnhanced" src="">
             </div>
             <div class="handle" id="sliderHandle"><i class="fas fa-arrows-alt-h"></i></div>
         </div>
 
-        <!-- THE REAL DOWNLOAD BUTTON -->
         <button id="downloadBtn" class="btn download-btn" onclick="forceDownload()">
-            <i class="fas fa-download"></i> Download HD Image
+            <i class="fas fa-download"></i> Download HD
         </button>
     </div>
 
-    <p style="margin-top:50px; font-size:12px; color:#aaa;">Developed by Abdul Wahid</p>
+    <div class="footer">
+        <p>© 2025 AI Photo Enhancer</p>
+        <p>Developed by <b>ABDUL WAHID</b></p>
+    </div>
 
-    <!-- Scripts -->
     <script>
-        let resultUrl = ""; // To store the final image URL
+        // ✅ আমি আপনার টোকেন এখানে বসিয়ে দিয়েছি, আর কিছু করতে হবে না
+        const HF_TOKEN = "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"; 
+
+        // ফেস ফিক্স মডেল
+        const MODEL_URL = "https://api-inference.huggingface.co/models/sczhou/CodeFormer";
+        
+        let resultUrl = "";
 
         function previewPhoto() {
             const file = document.getElementById('fileInput').files[0];
@@ -119,88 +116,73 @@
         async function enhancePhoto() {
             const file = document.getElementById('fileInput').files[0];
             if(!file) { alert("Please select a photo first!"); return; }
-            if(file.size > 4*1024*1024) { alert("File too large! Use < 4MB"); return; }
 
-            // UI Updates
             const btn = document.getElementById('enhanceBtn');
             btn.disabled = true;
             btn.innerHTML = "Processing... ⏳";
             document.getElementById('loader').style.display = 'block';
             document.getElementById('loadingText').style.display = 'block';
 
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async function() {
-                try {
-                    const response = await fetch('/.netlify/functions/restore', {
-                        method: 'POST',
-                        body: JSON.stringify({ image: reader.result })
-                    });
-                    const data = await response.json();
-
-                    if(data.output) {
-                        resultUrl = data.output; // Save URL for download
-                        
-                        // Setup Slider
-                        document.getElementById('imgOriginal').src = reader.result;
-                        document.getElementById('imgEnhanced').src = data.output;
-                        document.getElementById('result-area').style.display = 'block';
-                        document.getElementById('preview-image').style.display = 'none';
-                        
-                        initSlider(); // Activate Slider
-                    } else {
-                        alert("Error: " + data.error);
-                    }
-                } catch(e) {
-                    alert("Connection failed!");
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = "✨ Enhance Now";
-                    document.getElementById('loader').style.display = 'none';
-                    document.getElementById('loadingText').style.display = 'none';
-                }
-            }
-        }
-
-        // --- 100% WORKING DOWNLOAD LOGIC ---
-        async function forceDownload() {
-            if(!resultUrl) return;
-
-            const btn = document.getElementById('downloadBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "Downloading... ⏳";
-
             try {
-                // 1. Fetch the image as binary data (Blob)
-                const response = await fetch(resultUrl);
-                const blob = await response.blob();
-                
-                // 2. Create a fake local URL
-                const localUrl = window.URL.createObjectURL(blob);
-                
-                // 3. Force browser to download
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = localUrl;
-                a.download = "Enhanced_Photo_" + new Date().getTime() + ".jpg"; // Unique name
-                document.body.appendChild(a);
-                a.click();
-                
-                // 4. Cleanup
-                window.URL.revokeObjectURL(localUrl);
-                document.body.removeChild(a);
-                
-                btn.innerHTML = "✅ Saved to Gallery!";
-            } catch (error) {
-                // Fallback: If fetch fails, open in new tab
-                window.open(resultUrl, '_blank');
-                alert("Auto-download failed. Please long-press the image to save.");
+                const blob = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+
+                const response = await fetch(MODEL_URL, {
+                    headers: { 
+                        Authorization: `Bearer ${HF_TOKEN}`,
+                        "Content-Type": "application/octet-stream" 
+                    },
+                    method: "POST",
+                    body: blob,
+                });
+
+                if(response.status === 503) {
+                    throw new Error("Model is waking up! Please wait 20 seconds and try again.");
+                }
+
+                if(!response.ok) {
+                    const err = await response.text();
+                    throw new Error(err);
+                }
+
+                const resultBlob = await response.blob();
+                resultUrl = URL.createObjectURL(resultBlob);
+
+                const originalReader = new FileReader();
+                originalReader.onload = (e) => {
+                    document.getElementById('imgOriginal').src = e.target.result;
+                    document.getElementById('imgEnhanced').src = resultUrl;
+                    document.getElementById('result-area').style.display = 'block';
+                    document.getElementById('preview-image').style.display = 'none';
+                    initSlider();
+                };
+                originalReader.readAsDataURL(file);
+
+            } catch(e) {
+                console.error(e);
+                alert("Server Message: " + e.message);
             } finally {
-                setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+                btn.disabled = false;
+                btn.innerHTML = "✨ Enhance Photo";
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('loadingText').style.display = 'none';
             }
         }
 
-        // Slider Logic
+        function forceDownload() {
+            if(!resultUrl) return;
+            const a = document.createElement('a');
+            a.href = resultUrl;
+            a.download = "Enhanced_Wahid_" + new Date().getTime() + ".jpg";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
         function initSlider() {
             const slider = document.getElementById('comparisonSlider');
             const clipped = document.getElementById('imgClipped');
