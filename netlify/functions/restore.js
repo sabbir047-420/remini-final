@@ -8,13 +8,12 @@ exports.handler = async function (event, context) {
   try {
     const { image } = JSON.parse(event.body);
 
-    // বেস৬৪ ক্লিন করা
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
-    // Hugging Face API
+    // নতুন আপডেটেড লিংক (Hugging Face Router URL)
     const response = await fetch(
-      "https://api-inference.huggingface.co/models/bgs/ESRGAN",
+      "https://router.huggingface.co/models/bgs/ESRGAN",
       {
         headers: {
           Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
@@ -25,7 +24,7 @@ exports.handler = async function (event, context) {
       }
     );
 
-    // ১. যদি মডেল লোডিং অবস্থায় থাকে (503 Error)
+    // ১. মডেল চালু হতে দেরি হলে
     if (response.status === 503) {
         return {
             statusCode: 503,
@@ -33,13 +32,13 @@ exports.handler = async function (event, context) {
         };
     }
 
-    // ২. যদি অন্য কোনো এরর হয়
+    // ২. অন্য কোনো সমস্যা হলে
     if (!response.ok) {
         const errText = await response.text();
         return { statusCode: 500, body: JSON.stringify({ error: `API Error: ${errText}` }) };
     }
 
-    // ৩. সাকসেস হলে
+    // ৩. সব ঠিক থাকলে
     const arrayBuffer = await response.arrayBuffer();
     const resultBuffer = Buffer.from(arrayBuffer);
     const outputBase64 = `data:image/jpeg;base64,${resultBuffer.toString("base64")}`;
