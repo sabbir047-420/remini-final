@@ -7,38 +7,57 @@ exports.handler = async function (event, context) {
 
   try {
     const { image } = JSON.parse(event.body);
-
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
-    // ✅ ফাইনাল লিংক (Router URL) + সঠিক মডেল (ai-forever)
-    // এরর মেসেজ অনুযায়ী আমরা 'api-inference' সরিয়ে 'router' বসিয়েছি।
-    const API_URL = "https://router.huggingface.co/models/ai-forever/Real-ESRGAN";
+    // আমরা এখানে ২টি শক্তিশালী মডেল রেখেছি। প্রথমটি কাজ না করলে দ্বিতীয়টি চলবে।
+    const models = [
+        "https://api-inference.huggingface.co/models/sczhou/CodeFormer", // ফেস ফিক্স করার বস (Remini-র মতো)
+        "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-x4-upscaler" // ব্যাকআপ
+    ];
 
-    const response = await fetch(API_URL, {
-      headers: {
-        Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: buffer,
-    });
+    let response;
+    let lastError;
 
-    // ১. যদি মডেল চালু হতে দেরি হয় (503 Error)
-    if (response.status === 503) {
-       return {
-         statusCode: 503,
-         body: JSON.stringify({ error: "Model is waking up! Please wait 20 seconds and try again." })
-       };
+    // লুপ চালিয়ে দেখা হবে কোন মডেলটি চালু আছে
+    for (const modelUrl of models) {
+        try {
+            console.log("Trying model:", modelUrl);
+            response = await fetch(modelUrl, {
+                headers: {
+                    Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
+                    "Content-Type": "application/json",
+                },
+                method: "POST",
+                body: buffer,
+            });
+
+            // যদি মডেল লোডিং অবস্থায় থাকে (503 Error), ১৫ সেকেন্ড অপেক্ষা করে আবার চেষ্টা করবে
+            if (response.status === 503) {
+                await new Promise(r => setTimeout(r, 15000));
+                response = await fetch(modelUrl, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
+                        "Content-Type": "application/json",
+                    },
+                    method: "POST",
+                    body: buffer,
+                });
+            }
+
+            if (response.ok) break; // কাজ হলে লুপ থামিয়ে দেবে
+            lastError = await response.text();
+            
+        } catch (e) {
+            console.error(e);
+            lastError = e.message;
+        }
     }
 
-    // ২. অন্য কোনো এরর হলে
-    if (!response.ok) {
-        const errText = await response.text();
-        return { statusCode: 500, body: JSON.stringify({ error: `Server Error: ${errText}` }) };
+    if (!response || !response.ok) {
+        return { statusCode: 500, body: JSON.stringify({ error: "Server busy. Please try again in 1 minute." }) };
     }
 
-    // ৩. সাকসেস
     const arrayBuffer = await response.arrayBuffer();
     const resultBuffer = Buffer.from(arrayBuffer);
     const outputBase64 = `data:image/jpeg;base64,${resultBuffer.toString("base64")}`;
