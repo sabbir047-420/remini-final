@@ -11,9 +11,8 @@ exports.handler = async function (event, context) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
-    // ✅ নতুন মডেল: Sberbank AI (Real-ESRGAN)
-    // এটি অনেক বেশি পাওয়ারফুল এবং অফিশিয়াল, তাই নট ফাউন্ড হবে না।
-    const API_URL = "https://api-inference.huggingface.co/models/sberbank-ai/Real-ESRGAN";
+    // ✅ সঠিক মডেলের নাম: ai-forever (আগে ছিল sberbank-ai)
+    const API_URL = "https://api-inference.huggingface.co/models/ai-forever/Real-ESRGAN";
 
     const response = await fetch(API_URL, {
       headers: {
@@ -28,7 +27,7 @@ exports.handler = async function (event, context) {
     if (response.status === 503) {
        return {
          statusCode: 503,
-         body: JSON.stringify({ error: "Model is starting up... Please wait 30 seconds and try again!" })
+         body: JSON.stringify({ error: "Model is waking up! Please wait 20 seconds and try again." })
        };
     }
 
