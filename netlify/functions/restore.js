@@ -8,31 +8,50 @@ exports.handler = async function (event, context) {
   try {
     const { image } = JSON.parse(event.body);
 
-    // ১. বেস৬৪ ইমেজ থেকে আসল ইমেজ ডেটা বের করা
+    // বেস৬৪ ইমেজ ক্লিন করা
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
-    // ২. Hugging Face API কল করা (বিনামূল্যে)
-    // আমরা এখানে 'bgs/ESRGAN' মডেল ব্যবহার করছি যা ছবি ক্লিয়ার করে
-    const response = await fetch(
-      "https://api-inference.huggingface.co/models/bgs/ESRGAN",
-      {
+    // Hugging Face API (ESRGAN Model)
+    const API_URL = "https://api-inference.huggingface.co/models/bgs/ESRGAN";
+    
+    // অটোমেটিক রি-ট্রাই ফাংশন (সর্বোচ্চ ৫ বার চেষ্টা করবে)
+    async function queryWithRetry(data, retries = 5) {
+      const response = await fetch(API_URL, {
         headers: {
           Authorization: `Bearer ${process.env.HF_API_TOKEN}`,
           "Content-Type": "application/json",
         },
         method: "POST",
-        body: buffer,
-      }
-    );
+        body: data,
+      });
 
-    // ৩. যদি সার্ভার বিজি থাকে
-    if (!response.ok) {
-        const err = await response.text();
-        return { statusCode: 500, body: JSON.stringify({ error: "Free server is busy. Try again in 1 min." }) };
+      // যদি সার্ভার বিজি থাকে (503 Error)
+      if (response.status === 503) {
+        if (retries > 0) {
+          console.log("Model loading... waiting 10s");
+          // ১০ সেকেন্ড অপেক্ষা করবে
+          await new Promise((resolve) => setTimeout(resolve, 10000));
+          // আবার চেষ্টা করবে
+          return queryWithRetry(data, retries - 1);
+        } else {
+          throw new Error("Server is taking too long. Please try again later.");
+        }
+      }
+
+      // যদি অন্য কোনো এরর হয়
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`API Error: ${errText}`);
+      }
+
+      return response;
     }
 
-    // ৪. রেজাল্ট প্রসেস করা
+    // আসল কল শুরু
+    const response = await queryWithRetry(buffer);
+
+    // রেজাল্ট প্রসেস করা
     const arrayBuffer = await response.arrayBuffer();
     const resultBuffer = Buffer.from(arrayBuffer);
     const outputBase64 = `data:image/jpeg;base64,${resultBuffer.toString("base64")}`;
@@ -43,9 +62,6 @@ exports.handler = async function (event, context) {
     };
 
   } catch (error) {
+    console.error(error);
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-    };
-  }
-};
+      statusCo
