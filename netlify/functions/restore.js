@@ -11,8 +11,9 @@ exports.handler = async function (event, context) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
 
-    // ✅ সঠিক মডেলের নাম: ai-forever (আগে ছিল sberbank-ai)
-    const API_URL = "https://api-inference.huggingface.co/models/ai-forever/Real-ESRGAN";
+    // ✅ ফাইনাল লিংক (Router URL) + সঠিক মডেল (ai-forever)
+    // এরর মেসেজ অনুযায়ী আমরা 'api-inference' সরিয়ে 'router' বসিয়েছি।
+    const API_URL = "https://router.huggingface.co/models/ai-forever/Real-ESRGAN";
 
     const response = await fetch(API_URL, {
       headers: {
