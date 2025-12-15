@@ -6,97 +6,63 @@
     <title>AI Photo Enhancer</title>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#FF4D5A">
-
-    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
     <style>
         body { font-family: 'Poppins', sans-serif; background: #F6F7FB; text-align: center; margin: 0; padding: 20px; color: #333; }
-        
         nav { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .logo { font-weight: 700; font-size: 18px; }
         .logo span { color: #FF4D5A; }
         .dev-badge { background: #fff0f1; color: #FF4D5A; padding: 5px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; }
-
-        h1 { font-size: 26px; line-height: 1.3; margin-bottom: 10px; }
-        
         .upload-box { background: white; padding: 40px; border-radius: 20px; border: 2px dashed #FF4D5A; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
-        .upload-box:active { transform: scale(0.98); background: #fff5f6; }
-        .icon-large { font-size: 50px; color: #FF4D5A; margin-bottom: 10px; }
-        
         .btn { background: #FF4D5A; color: white; border: none; padding: 16px 30px; font-size: 18px; border-radius: 50px; font-weight: 600; width: 100%; max-width: 350px; cursor: pointer; box-shadow: 0 8px 20px rgba(255, 77, 90, 0.3); transition: 0.3s; }
         .btn:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
-        
         .loader { display: none; margin: 20px auto; border: 4px solid #f3f3f3; border-top: 4px solid #FF4D5A; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         #result-area { display: none; margin-top: 30px; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        
         .ba-slider { position: relative; width: 100%; overflow: hidden; border-radius: 15px; touch-action: none; border: 2px solid #eee; }
         .ba-slider img { width: 100%; display: block; }
         .img-after { position: absolute; top: 0; left: 0; height: 100%; width: 50%; border-right: 3px solid white; background-size: cover; overflow: hidden; }
         .handle { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #FF4D5A; box-shadow: 0 4px 10px rgba(0,0,0,0.3); pointer-events: none; }
-        
         .download-btn { background: #2ecc71; margin-top: 20px; display: inline-block; box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3); }
-
         .footer { margin-top: 50px; color: #888; font-size: 13px; }
     </style>
 </head>
 <body>
-
     <nav>
         <div class="logo">AI <span>Enhancer</span></div>
         <div class="dev-badge">ABDUL WAHID</div>
     </nav>
-
     <h1>Make Photos <br> <span style="color:#FF4D5A">Crystal Clear</span></h1>
-    <p style="color:#666; font-size:14px; margin-bottom:30px;">Fix blurry photos instantly using AI</p>
-
-    <!-- Upload Section -->
+    
     <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-        <i class="fas fa-cloud-upload-alt icon-large"></i>
+        <i class="fas fa-cloud-upload-alt" style="font-size:50px; color:#FF4D5A; margin-bottom:10px;"></i>
         <h3>Upload Photo</h3>
-        <p style="color:#888; font-size:12px;">Supported: JPG, PNG (Max 5MB)</p>
+        <p style="color:#888; font-size:12px;">Max size: 5MB</p>
         <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewPhoto()">
     </div>
-
     <img id="preview-image" src="" style="width:100%; border-radius:15px; display:none; margin-bottom:20px; border:2px solid #eee;">
-
-    <button id="enhanceBtn" class="btn" onclick="enhancePhoto()">✨ Enhance Photo</button>
     
+    <button id="enhanceBtn" class="btn" onclick="enhancePhoto()">✨ Enhance Photo</button>
     <div class="loader" id="loader"></div>
-    <p id="loadingText" style="display:none; color:#666; margin-top:10px;">Enhancing... This may take 30-60s...</p>
+    <p id="loadingText" style="display:none; color:#666; margin-top:10px;">Enhancing... (20-40s)</p>
 
-    <!-- Result Section -->
     <div id="result-area">
         <h3 style="margin-bottom:15px; color:#333;">Before / After</h3>
-        
         <div class="ba-slider" id="comparisonSlider">
             <img id="imgOriginal" src="">
-            <div class="img-after" id="imgClipped">
-                <img id="imgEnhanced" src="">
-            </div>
+            <div class="img-after" id="imgClipped"><img id="imgEnhanced" src=""></div>
             <div class="handle" id="sliderHandle"><i class="fas fa-arrows-alt-h"></i></div>
         </div>
-
-        <button id="downloadBtn" class="btn download-btn" onclick="forceDownload()">
-            <i class="fas fa-download"></i> Download HD
-        </button>
+        <button id="downloadBtn" class="btn download-btn" onclick="forceDownload()"><i class="fas fa-download"></i> Download HD</button>
     </div>
 
-    <div class="footer">
-        <p>© 2025 AI Photo Enhancer</p>
-        <p>Developed by <b>ABDUL WAHID</b></p>
-    </div>
+    <div class="footer"><p>Developed by <b>ABDUL WAHID</b></p></div>
 
     <script>
-        // ✅ আমি আপনার টোকেন এখানে বসিয়ে দিয়েছি, আর কিছু করতে হবে না
+        // ✅ টোকেন বসানো আছে
         const HF_TOKEN = "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"; 
-
-        // ফেস ফিক্স মডেল
         const MODEL_URL = "https://api-inference.huggingface.co/models/sczhou/CodeFormer";
-        
         let resultUrl = "";
 
         function previewPhoto() {
@@ -124,26 +90,25 @@
             document.getElementById('loadingText').style.display = 'block';
 
             try {
-                const blob = await new Promise((resolve, reject) => {
+                // ১. ইমেজকে Base64 এ কনভার্ট করা (JSON মেথডের জন্য)
+                const base64Image = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result);
+                    reader.onload = () => resolve(reader.result.split(',')[1]);
                     reader.onerror = reject;
-                    reader.readAsArrayBuffer(file);
+                    reader.readAsDataURL(file);
                 });
 
+                // ২. JSON আকারে ডেটা পাঠানো (সবচেয়ে নিরাপদ পদ্ধতি)
                 const response = await fetch(MODEL_URL, {
                     headers: { 
                         Authorization: `Bearer ${HF_TOKEN}`,
-                        "Content-Type": "application/octet-stream" 
+                        "Content-Type": "application/json" 
                     },
                     method: "POST",
-                    body: blob,
+                    body: JSON.stringify({ "inputs": base64Image }),
                 });
 
-                if(response.status === 503) {
-                    throw new Error("Model is waking up! Please wait 20 seconds and try again.");
-                }
-
+                if(response.status === 503) throw new Error("Model is waking up! Wait 20s and click again.");
                 if(!response.ok) {
                     const err = await response.text();
                     throw new Error(err);
@@ -164,7 +129,7 @@
 
             } catch(e) {
                 console.error(e);
-                alert("Server Message: " + e.message);
+                alert("Error: " + e.message);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = "✨ Enhance Photo";
@@ -177,7 +142,7 @@
             if(!resultUrl) return;
             const a = document.createElement('a');
             a.href = resultUrl;
-            a.download = "Enhanced_Wahid_" + new Date().getTime() + ".jpg";
+            a.download = "Enhanced_Wahid.jpg";
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -187,7 +152,6 @@
             const slider = document.getElementById('comparisonSlider');
             const clipped = document.getElementById('imgClipped');
             const handle = document.getElementById('sliderHandle');
-            
             const move = (e) => {
                 const rect = slider.getBoundingClientRect();
                 let x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
