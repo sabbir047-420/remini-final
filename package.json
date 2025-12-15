@@ -1,0 +1,7 @@
+{
+  "name": "ai-photo-enhancer",
+  "version": "1.0.0",
+  "dependencies": {
+    "replicate": "^0.25.1"
+  }
+}
